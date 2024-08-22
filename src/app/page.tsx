@@ -1,113 +1,244 @@
-import Image from "next/image";
+"use client"
+import { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { NewspaperIcon, InboxIcon, ClockIcon } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Home() {
+  const { theme } = useTheme()
+  const [email, setEmail] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Handle the email submission here
+    console.log('Email submitted:', email)
+    // You can add logic here to send the email to your backend or show a success message
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <section className={`w-full py-12 md:py-24 lg:py-32 xl:py-48 ${
+        theme === 'dark' ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-white to-gray-100'
+      }`}>
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                Stay Informed, Save Time
+              </h1>
+              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+                Automated email summaries and newsletters from your favorite sources. Never miss important news again.
+              </p>
+            </div>
+            <div className="w-full max-w-sm space-y-2">
+              <form className="flex space-x-2" onSubmit={handleSubmit}>
+                <Input
+                  className="max-w-lg flex-1"
+                  placeholder="Enter your email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <Button type="submit">Get Started</Button>
+              </form>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Start your 14-day free trial. No credit card required.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+      </section>
+      <section id="features" className="w-full py-12 md:py-24 lg:py-32">
+        <div className="container px-4 md:px-6">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card>
+              <CardHeader>
+                <NewspaperIcon className="h-12 w-12 mb-4 text-primary" />
+                <CardTitle>Custom News Sources</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Choose your favorite news sources and get tailored summaries delivered to your inbox.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <InboxIcon className="h-12 w-12 mb-4 text-primary" />
+                <CardTitle>Email Summaries</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Receive concise email summaries of the most important news, saving you time and keeping you informed.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <ClockIcon className="h-12 w-12 mb-4 text-primary" />
+                <CardTitle>Time-Saving</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Stay on top of current events without spending hours reading full articles. Get the essence in minutes.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+      <section id="pricing" className={`w-full py-12 md:py-24 lg:py-32 ${
+        theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+      }`}>
+        <div className="container px-4 md:px-6">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Simple, Transparent Pricing</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Basic</CardTitle>
+                <CardDescription>For casual readers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-4xl font-bold">$9/mo</p>
+                <ul className="mt-4 space-y-2">
+                  <li>3 news sources</li>
+                  <li>Daily summaries</li>
+                  <li>Email delivery</li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full">Choose Basic</Button>
+              </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Pro</CardTitle>
+                <CardDescription>For avid news consumers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-4xl font-bold">$19/mo</p>
+                <ul className="mt-4 space-y-2">
+                  <li>10 news sources</li>
+                  <li>Twice-daily summaries</li>
+                  <li>Email & app delivery</li>
+                  <li>Custom categories</li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full">Choose Pro</Button>
+              </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Enterprise</CardTitle>
+                <CardDescription>For teams and organizations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-4xl font-bold">Custom</p>
+                <ul className="mt-4 space-y-2">
+                  <li>Unlimited news sources</li>
+                  <li>Real-time summaries</li>
+                  <li>Multi-platform delivery</li>
+                  <li>Advanced analytics</li>
+                  <li>Dedicated support</li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full">Contact Sales</Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </section>
+      <section className="w-full py-12 md:py-24 lg:py-32">
+        <div className="container px-4 md:px-6">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">What Our Users Say</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                quote: "Briefly has revolutionized how I stay informed. It's a game-changer!",
+                author: "Jane Doe, Entrepreneur"
+              },
+              {
+                quote: "I save hours each day thanks to these concise summaries. Highly recommended!",
+                author: "John Smith, Journalist"
+              },
+              {
+                quote: "The custom news sources feature is exactly what I needed. Great service!",
+                author: "Emily Brown, Marketing Manager"
+              }
+            ].map((testimonial, index) => (
+              <Card key={index}>
+                <CardContent className="pt-4">
+                  <blockquote className="border-l-4 pl-4 italic">
+                    "{testimonial.quote}"
+                  </blockquote>
+                  <p className="mt-4 font-semibold">{testimonial.author}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section id="faq" className={`w-full py-12 md:py-24 lg:py-32 ${
+        theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+      }`}>
+        <div className="container px-4 md:px-6">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">Frequently Asked Questions</h2>
+          <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>How often will I receive summaries?</AccordionTrigger>
+              <AccordionContent>
+                Depending on your plan, you'll receive summaries daily or twice daily. Enterprise users can opt for real-time updates.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Can I change my news sources?</AccordionTrigger>
+              <AccordionContent>
+                Yes, you can easily add, remove, or change your news sources from your dashboard at any time.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+              <AccordionTrigger>Is there a mobile app available?</AccordionTrigger>
+              <AccordionContent>
+                Yes, we offer mobile apps for both iOS and Android platforms for our Pro and Enterprise users.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-4">
+              <AccordionTrigger>What if I want to cancel my subscription?</AccordionTrigger>
+              <AccordionContent>
+                You can cancel your subscription at any time from your account settings. There are no long-term commitments or cancellation fees.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
+      <section className={`w-full py-12 md:py-24 lg:py-32 ${
+        theme === 'dark' ? 'bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground'
+      }`}>
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Ready to Stay Informed?</h2>
+              <p className="mx-auto max-w-[600px] text-primary-foreground/90 md:text-xl">
+                Join thousands of users who save time and stay updated with Briefly.
+              </p>
+            </div>
+            <div className="w-full max-w-sm space-y-2">
+              <form className="flex space-x-2" onSubmit={handleSubmit}>
+                <Input
+                  className="max-w-lg flex-1 bg-primary-foreground text-primary"
+                  placeholder="Enter your email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <Button type="submit" variant="secondary">Get Started</Button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  )
 }
