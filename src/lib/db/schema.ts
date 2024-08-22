@@ -5,7 +5,6 @@ export const $users = pgTable('users', {
   clerkId: varchar('clerk_id').notNull().unique(),
   email: varchar('email').notNull().unique(),
   websites: varchar('websites').array().notNull(),
-  isPremium: boolean('is_premium').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

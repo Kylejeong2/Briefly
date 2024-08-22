@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User already subscribed' }, { status: 400 });
     }
 
-    await db.insert($users).values({ id: userId, clerkId: userId, email, websites, isPremium });
+    await db.insert($users).values({ id: userId, clerkId: userId, email, websites });
 
     return NextResponse.json({ message: 'Subscription successful' }, { status: 200 });
   } catch (error) {

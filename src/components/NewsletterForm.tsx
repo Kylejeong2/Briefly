@@ -18,7 +18,8 @@ interface NewsletterFormProps {
 export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
   const { theme } = useTheme()
   const [email, setEmail] = useState("")
-  const [urls, setUrls] = useState<string[]>([])
+  const [urls, setUrls] = useState<string[]>([''])
+  const [isCustomUrl, setIsCustomUrl] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
   const { userId } = useAuth()
@@ -38,9 +39,42 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
         const data = await response.json()
         setEmail(data.email)
         setUrls(data.websites)
+        setIsCustomUrl(!FREE_TIER_OPTIONS.includes(data.websites[0]))
       }
     } catch (error) {
       console.error("Error fetching user data:", error)
+    }
+  }
+
+  const handleUrlChange = (index: number, value: string) => {
+    const newUrls = [...urls]
+    newUrls[index] = value
+    setUrls(newUrls)
+
+    // Check for duplicates
+    const isDuplicate = newUrls.indexOf(value) !== newUrls.lastIndexOf(value)
+    if (isDuplicate) {
+      setMessage("Duplicate sources are not allowed.")
+    } else {
+      setMessage("")
+    }
+  }
+
+  const toggleCustomUrl = () => {
+    setIsCustomUrl(!isCustomUrl)
+    
+    // Reset the first URL value when toggling
+    const newUrls = [...urls]
+    newUrls[0] = ''
+    setUrls(newUrls)
+  }
+
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url)
+      return true
+    } catch {
+      return false
     }
   }
 
@@ -49,7 +83,22 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
     setIsLoading(true)
     setMessage("")
 
-    if (!isPaidTier && urls.some(url => !FREE_TIER_OPTIONS.includes(url))) {
+    // Validate URLs
+    const invalidUrls = urls.filter(url => url && !isValidUrl(url))
+    if (invalidUrls.length > 0) {
+      setMessage("Please enter valid URLs for all sources.")
+      setIsLoading(false)
+      return
+    }
+
+    // Check for duplicates
+    if (new Set(urls.filter(Boolean)).size !== urls.filter(Boolean).length) {
+      setMessage("Duplicate sources are not allowed.")
+      setIsLoading(false)
+      return
+    }
+
+    if (!isPaidTier && urls.some((url, index) => index === 0 ? !isValidUrl(url) : !FREE_TIER_OPTIONS.includes(url))) {
       setShowPaymentModal(true)
       setIsLoading(false)
       return
@@ -128,28 +177,30 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
                     <MinusIcon className="h-4 w-4" />
                   </Button>
                 )}
+                {index === 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleCustomUrl}
+                  >
+                    {isCustomUrl ? "Select from list" : "Enter custom URL"}
+                  </Button>
+                )}
               </div>
-              {isPaidTier ? (
+              {index === 0 && isCustomUrl ? (
                 <Input
                   id={`url${index + 1}`}
-                  placeholder={`https://news-source-${index + 1}.com`}
+                  placeholder="https://news-source.com"
                   type="url"
                   value={url}
-                  onChange={(e) => {
-                    const newUrls = [...urls]
-                    newUrls[index] = e.target.value
-                    setUrls(newUrls)
-                  }}
-                  required={index === 0}
+                  onChange={(e) => handleUrlChange(index, e.target.value)}
+                  required
                 />
               ) : (
                 <Select
                   value={url}
-                  onValueChange={(value: string) => {
-                    const newUrls = [...urls]
-                    newUrls[index] = value
-                    setUrls(newUrls)
-                  }}
+                  onValueChange={(value: string) => handleUrlChange(index, value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a news source" />
@@ -180,7 +231,7 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
             {isLoading ? "Processing..." : (isSubscribed ? "Update Subscription" : "Subscribe")}
           </Button>
         </form>
-        {message && <p className="mt-2 text-sm text-gray-600">{message}</p>}
+        {message && <p className="mt-2 text-sm text-red-600">{message}</p>}
         {showPaymentModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg">

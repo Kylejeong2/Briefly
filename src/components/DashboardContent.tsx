@@ -47,19 +47,15 @@ export default function DashboardContent() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {isSubscribed && (
         <DashboardCard title="News Sources" icon={<FaNewspaper />}>
           <CurrentNewsSources />
         </DashboardCard>
-      )}
       <DashboardCard title={isSubscribed ? "Update Subscription" : "Subscribe to Newsletter"} icon={<FaEnvelope />}>
         <NewsletterForm isSubscribed={isSubscribed} />
       </DashboardCard>
-      {isSubscribed && (
         <DashboardCard title="Your Summaries" icon={<FaFileAlt />}>
           <p className="text-gray-600 dark:text-gray-300">No summaries yet. They will appear here once generated.</p>
         </DashboardCard>
-      )}
     </div>
   )
 }

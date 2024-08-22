@@ -1,20 +1,6 @@
 import { NextResponse } from 'next/server';
-import { register, Gauge } from 'prom-client';
-
-export const newsletterJobDuration = new Gauge({
-  name: 'newsletter_job_duration_seconds',
-  help: 'Duration of newsletter job in seconds',
-});
-
-export const newsletterJobSuccessCount = new Gauge({
-  name: 'newsletter_job_success_count',
-  help: 'Number of successful newsletter sends',
-});
-
-export const newsletterJobFailureCount = new Gauge({
-  name: 'newsletter_job_failure_count',
-  help: 'Number of failed newsletter sends',
-});
+import { register } from 'prom-client';
+import { newsletterJobDuration, newsletterJobSuccessCount, newsletterJobFailureCount } from './metrics';
 
 export async function GET() {
   return new NextResponse(await register.metrics(), {
@@ -42,12 +28,3 @@ export async function POST(request: Request) {
     },
   });
 }
-
-// // Initialize the metrics
-// register.registerMetric(newsletterJobDuration);
-// register.registerMetric(newsletterJobSuccessCount);
-// register.registerMetric(newsletterJobFailureCount);
-
-// // Set default values
-// newsletterJobSuccessCount.set(0);
-// newsletterJobFailureCount.set(0);

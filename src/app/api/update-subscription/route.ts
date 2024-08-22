@@ -20,7 +20,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    await db.update($users).set({ email, websites, isPremium }).where(eq($users.clerkId, userId));
+    await db.update($users).set({ email, websites }).where(eq($users.clerkId, userId));
 
     return NextResponse.json({ message: 'Subscription updated successfully' }, { status: 200 });
   } catch (error) {

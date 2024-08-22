@@ -1,16 +1,14 @@
 import { db } from '@/lib/db';
 import { $users } from '@/lib/db/schema';
-import { scrapeNews } from './scraper';
-import { generateSummary } from './summarizer';
 import { generateNewsletter } from './newsletterGenerator';
 import { sendEmail } from './mailjetService';
 import { FREE_TIER_OPTIONS } from '@/lib/constants';
+import axios from 'axios';
 
 interface UserData {
   id: string;
   email: string;
   websites: string[];
-  isPremium: boolean;
 }
 
 interface ArticleSummary {
@@ -27,25 +25,28 @@ export async function batchProcessNewsletters() {
   const websiteMap = new Map<string, UserData[]>();
   users.forEach(user => {
     user.websites.forEach(website => {
-      if (FREE_TIER_OPTIONS.includes(website) || user.isPremium) {
+      if (FREE_TIER_OPTIONS.includes(website)) {
         if (!websiteMap.has(website)) {
           websiteMap.set(website, []);
         }
-        websiteMap.get(website)!.push(user);
+        websiteMap.get(website)!.push({
+          id: user.id,
+          email: user.email,
+          websites: user.websites,
+        });
       }
     });
   });
 
-  // 3. Scrape and summarize each unique website
+  // 3. Scrape and summarize each unique website using the Python server
   const summariesMap = new Map<string, ArticleSummary[]>();
   for (const [website, _] of Array.from(websiteMap.entries())) {
-    const articles = await scrapeNews(website);
-    const summaries = await Promise.all(articles.map(async (article) => ({
-      url: website,
-      title: article.title,
-      summary: await generateSummary(article.content) // need to wait unitl scraping is good
-    })));
-    summariesMap.set(website, summaries);
+    try {
+      const response = await axios.post('http://localhost:5000/scrape-and-summarize', { url: website });
+      summariesMap.set(website, response.data);
+    } catch (error) {
+      console.error(`Error scraping and summarizing ${website}:`, error);
+    }
   }
 
   // 4. Generate and send newsletters for each user
