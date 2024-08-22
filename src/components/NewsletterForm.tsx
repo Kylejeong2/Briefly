@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTheme } from '@/contexts/ThemeContext'
+import { PlusIcon, MinusIcon } from 'lucide-react'
 
 interface NewsletterFormProps {
   isSubscribed: boolean;
@@ -15,7 +16,7 @@ interface NewsletterFormProps {
 export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
   const { theme } = useTheme()
   const [email, setEmail] = useState("")
-  const [urls, setUrls] = useState(["", "", ""])
+  const [urls, setUrls] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
   const { userId } = useAuth()
@@ -58,6 +59,9 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
 
       if (response.ok) {
         setMessage(isSubscribed ? "Subscription updated successfully!" : "Subscription successful!")
+        if (isSubscribed) {
+          window.location.reload()
+        }
       } else {
         const data = await response.json()
         setMessage(data.error || "An error occurred. Please try again.")
@@ -70,11 +74,22 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
     }
   }
 
+  const addUrlField = () => {
+    if (urls.length < 3) {
+      setUrls([...urls, ''])
+    }
+  }
+
+  const removeUrlField = (index: number) => {
+    const newUrls = urls.filter((_, i) => i !== index)
+    setUrls(newUrls)
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>{isSubscribed ? "Update Subscription" : "Subscribe to Newsletter"}</CardTitle>
-        <CardDescription>{isSubscribed ? "Update your email and URLs for news sources" : "Enter your email and URLs for news sources"}</CardDescription>
+        <CardDescription>{isSubscribed ? "Update your email and URLs for news sources" : "Enter your email and at least one URL for news sources"}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -91,7 +106,19 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
           </div>
           {urls.map((url, index) => (
             <div key={index} className="space-y-2">
-              <Label htmlFor={`url${index + 1}`}>URL {index + 1}</Label>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor={`url${index + 1}`}>URL {index + 1}{index === 0 && " (Required)"}</Label>
+                {index > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removeUrlField(index)}
+                  >
+                    <MinusIcon className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
               <Input
                 id={`url${index + 1}`}
                 placeholder={`https://news-source-${index + 1}.com`}
@@ -106,6 +133,17 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
               />
             </div>
           ))}
+          {urls.length < 3 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addUrlField}
+              className="w-full"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Another URL
+            </Button>
+          )}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Processing..." : (isSubscribed ? "Update Subscription" : "Subscribe")}
           </Button>

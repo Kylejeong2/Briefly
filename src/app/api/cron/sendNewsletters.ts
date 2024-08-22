@@ -1,29 +1,41 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { $users } from '@/lib/db/schema';
-import { scrapeNews, generateSummary } from '@/lib/newsService';
-import { sendEmail } from '@/lib/mailjetService';
+import { newsletterQueue } from '@/lib/queue';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    try {
-      const allUsers = await db.select().from($users);
-
-      for (const user of allUsers) {
-        const newsItems = await Promise.all(user.websites.map(scrapeNews));
-        const summaries = await Promise.all(newsItems.map(generateSummary));
-
-        const emailContent = summaries.join('\n\n');
-        await sendEmail(user.email, 'Your Daily Newsletter', emailContent);
-      }
-
-      res.status(200).json({ message: 'Newsletters sent successfully' });
-    } catch (error) {
-      console.error('Error sending newsletters:', error);
-      res.status(500).json({ error: 'Internal server error' });
+export async function POST() {
+  try {
+    const allUsers = await db.select().from($users);
+    
+    if (!allUsers || allUsers.length === 0) {
+      return NextResponse.json({ message: 'No users found to send newsletters' }, { status: 404 });
     }
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+
+    const queueResults = await Promise.all(
+      allUsers.map(async (user) => {
+        try {
+          await newsletterQueue.add(user);
+          return { success: true, userId: user.id };
+        } catch (queueError) {
+          console.error(`Error queuing newsletter for user ${user.id}:`, queueError);
+          return { success: false, userId: user.id, error: queueError };
+        }
+      })
+    );
+
+    const failedJobs = queueResults.filter(result => !result.success);
+
+    if (failedJobs.length > 0) {
+      console.error('Some newsletter jobs failed to queue:', failedJobs);
+      return NextResponse.json({ 
+        message: 'Some newsletter jobs failed to queue', 
+        failedJobs 
+      }, { status: 207 });
+    }
+
+    return NextResponse.json({ message: 'Newsletter jobs queued successfully' }, { status: 200 });
+  } catch (error) {
+    console.error('Error queuing newsletter jobs:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

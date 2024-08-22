@@ -6,11 +6,13 @@ import CurrentNewsSources from "@/components/CurrentNewsSources";
 import NewsletterForm from "@/components/NewsletterForm";
 import { FaNewspaper, FaEnvelope, FaFileAlt } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function DashboardContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const { userId } = useAuth()
+  const { theme } = useTheme()
 
   useEffect(() => {
     if (userId) {
@@ -38,7 +40,7 @@ export default function DashboardContent() {
   if (isLoading) {
     return (
       <div className="text-center py-8">
-        <ImSpinner8 className="inline-block animate-spin text-4xl text-blue-500" />
+        <ImSpinner8 className="inline-block animate-spin text-4xl text-blue-500 dark:text-blue-400" />
       </div>
     )
   }
@@ -55,7 +57,7 @@ export default function DashboardContent() {
       </DashboardCard>
       {isSubscribed && (
         <DashboardCard title="Your Summaries" icon={<FaFileAlt />}>
-          <p className="text-gray-600">No summaries yet. They will appear here once generated.</p>
+          <p className="text-gray-600 dark:text-gray-300">No summaries yet. They will appear here once generated.</p>
         </DashboardCard>
       )}
     </div>
@@ -63,10 +65,12 @@ export default function DashboardContent() {
 }
 
 function DashboardCard({ title, children, icon }: { title: string; children: React.ReactNode; icon: React.ReactNode }) {
+  const { theme } = useTheme()
+  
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4 flex items-center text-gray-800">
-        <span className="mr-2 text-blue-500">{icon}</span>
+    <div className={`rounded-lg shadow-md p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+      <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <span className={`mr-2 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`}>{icon}</span>
         {title}
       </h2>
       {children}
