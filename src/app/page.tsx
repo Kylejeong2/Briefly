@@ -170,7 +170,7 @@ export default function Home() {
               <Card key={index}>
                 <CardContent className="pt-4">
                   <blockquote className="border-l-4 pl-4 italic">
-                    "{testimonial.quote}"
+                    &quot;{testimonial.quote}&quot;
                   </blockquote>
                   <p className="mt-4 font-semibold">{testimonial.author}</p>
                 </CardContent>
@@ -188,7 +188,7 @@ export default function Home() {
             <AccordionItem value="item-1">
               <AccordionTrigger>How often will I receive summaries?</AccordionTrigger>
               <AccordionContent>
-                Depending on your plan, you'll receive summaries daily or twice daily. Enterprise users can opt for real-time updates.
+                Depending on your plan, you&apos;ll receive summaries daily or twice daily. Enterprise users can opt for real-time updates.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
