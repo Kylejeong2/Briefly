@@ -6,16 +6,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { NewspaperIcon, InboxIcon, ClockIcon } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useRouter } from 'next/navigation'
+import { useSignIn } from '@clerk/nextjs'
 
 export default function Home() {
   const { theme } = useTheme()
   const [email, setEmail] = useState('')
+  const router = useRouter()
+  const { signIn } = useSignIn()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle the email submission here
-    console.log('Email submitted:', email)
-    // You can add logic here to send the email to your backend or show a success message
+    if (email) {
+      try {
+        await signIn?.create({
+          identifier: email,
+        })
+        router.push('/sign-in?email=' + encodeURIComponent(email))
+      } catch (err) {
+        console.error('Error during sign in:', err)
+      }
+    } else {
+      router.push('/sign-in')
+    }
   }
 
   return (
@@ -41,12 +54,11 @@ export default function Home() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                 />
                 <Button type="submit">Get Started</Button>
               </form>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Start your 14-day free trial. No credit card required.
+                Start today! No credit card required.
               </p>
             </div>
           </div>
@@ -231,7 +243,6 @@ export default function Home() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                 />
                 <Button type="submit" variant="secondary">Get Started</Button>
               </form>
