@@ -12,7 +12,7 @@ const template = `
   </style>
 </head>
 <body>
-  <h1>Your Daily News Summary</h1>
+  <h1>Your Daily Briefly</h1>
   {{#each articles}}
     <div class="article">
       <h2>{{title}}</h2>
