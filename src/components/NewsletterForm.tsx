@@ -189,7 +189,6 @@ export default function NewsletterForm({ userData, onUpdate }: NewsletterFormPro
                 )}
               </div>
               {index === 0 && isCustomUrl ? (
-                <>
                   <Input
                     id={`url${index + 1}`}
                     placeholder="https://news-source.com"
@@ -198,8 +197,6 @@ export default function NewsletterForm({ userData, onUpdate }: NewsletterFormPro
                     onChange={(e) => handleUrlChange(index, e.target.value)}
                     required
                   />
-                  {message && <p className="mt-2 text-sm text-red-600">{message}</p>}
-                </>
               ) : (
                 <Select
                   value={url}
