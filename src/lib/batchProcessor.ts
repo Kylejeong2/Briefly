@@ -6,13 +6,14 @@ interface ArticleSummary {
   url: string;
   title: string;
   summary: string;
+  source: string;
 }
 
-const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL || 'http://localhost:5000';
-const API_KEY = process.env.FLASK_API_KEY;
+const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL || 'http://localhost:8000';
+const API_KEY = process.env.PYTHON_SERVER_API_KEY;
 
 if (!API_KEY) {
-  throw new Error('FLASK_API_KEY is not set in the environment variables');
+  throw new Error('PYTHON_SERVER_API_KEY is not set in the environment variables');
 }
 
 export async function batchProcessNewsletters() {
@@ -32,12 +33,23 @@ export async function batchProcessNewsletters() {
 
     // 5. Call Python script for scraping and summarization
     const websiteUrls = websites.map(website => website.url);
-    const summaries = await fetchSummariesFromFlask(websiteUrls);
+    let summaries: ArticleSummary[];
+    try {
+      summaries = await fetchSummariesFromFlask(websiteUrls);
+    } catch (error) {
+      console.error('Error fetching summaries:', error);
+      // Handle the error by returning an empty array or taking appropriate action
+      return [];
+    }
 
     // 6. Prepare batched jobs for the queue
     const batchedJobs = [];
     for (const user of users) {
-      const userSummaries = summaries.filter(summary => user.websites.includes(summary.url));
+      const userSummaries = summaries.filter(summary => 
+        user.websites.some(website => 
+          new URL(summary.source).hostname.includes(new URL(website).hostname)
+        )
+      );
 
       batchedJobs.push({
         userId: user.id,
@@ -55,18 +67,28 @@ export async function batchProcessNewsletters() {
 }
 
 async function fetchSummariesFromFlask(urls: string[]): Promise<ArticleSummary[]> {
-  const response = await fetch(`${FLASK_SERVER_URL}/scrape-and-summarize`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': API_KEY || '',
-    },
-    body: JSON.stringify({ urls }),
-  });
+  try {
+    console.log('Request body:', JSON.stringify({ urls }));
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const response = await fetch(`${FLASK_SERVER_URL}/scrape-and-summarize`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY!
+      },
+      body: JSON.stringify({ urls }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
+    }
+
+    const data = await response.json();
+    console.log('Response data:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in fetchSummariesFromFlask:', error);
+    throw new Error(`Failed to fetch summaries: ${error instanceof Error ? error.message : String(error)}`);
   }
-
-  return response.json();
 }

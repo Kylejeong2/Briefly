@@ -7,31 +7,36 @@ import NewsletterForm from "@/components/NewsletterForm";
 import { FaNewspaper, FaEnvelope, FaFileAlt } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
 import { useTheme } from '@/contexts/ThemeContext'
+// import TestNewsletterButton from "@/components/TestNewsletterButton";
+import { NOT_WORKING_YET } from "@/lib/constants";
 
 export default function DashboardContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubscribed, setIsSubscribed] = useState(false)
+  const [userData, setUserData] = useState<{ email: string; websites: string[] } | null>(null)
   const { userId } = useAuth()
   const { theme } = useTheme()
 
   useEffect(() => {
     if (userId) {
-      checkSubscriptionStatus()
+      fetchUserData()
     }
   }, [userId])
 
-  const checkSubscriptionStatus = async () => {
+  const fetchUserData = async () => {
     try {
       const response = await fetch(`/api/getUserData?userId=${userId}`)
       if (response.ok) {
-        setIsSubscribed(true)
+        const data = await response.json()
+        setUserData(data)
+        setIsSubscribed(data.websites?.length > 0 || false)
       } else if (response.status === 404) {
         setIsSubscribed(false)
       } else {
-        console.error("Error checking subscription status:", response.statusText)
+        console.error("Error fetching user data:", response.statusText)
       }
     } catch (error) {
-      console.error("Error checking subscription status:", error)
+      console.error("Error fetching user data:", error)
     } finally {
       setIsLoading(false)
     }
@@ -48,16 +53,31 @@ export default function DashboardContent() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <DashboardCard title="News Sources" icon={<FaNewspaper />}>
-          <CurrentNewsSources />
+          {userData && <CurrentNewsSources userData={userData} />}
         </DashboardCard>
       <DashboardCard title={isSubscribed ? "Update Subscription" : "Subscribe to Newsletter"} icon={<FaEnvelope />}>
-        <NewsletterForm isSubscribed={isSubscribed} />
+        {userData && <NewsletterForm userData={userData} onUpdate={fetchUserData} />}
       </DashboardCard>
-        <DashboardCard title="Your Summaries" icon={<FaFileAlt />}>
-          <p className="text-gray-600 dark:text-gray-300">No summaries yet. They will appear here once generated.</p>
+        <DashboardCard title="List of Websites Currently Not Working (Will be ready soon)" icon={<FaFileAlt />}>
+          <ul className="list-disc pl-5 text-gray-600 dark:text-gray-300">
+            {NOT_WORKING_YET.map((website, index) => (
+              <li key={index}>{getHostname(website)}</li>
+            ))}
+          </ul>
         </DashboardCard>
+        {/* <DashboardCard title="Test Newsletter" icon={<FaFileAlt />}>
+          <TestNewsletterButton />
+        </DashboardCard> */}
     </div>
   )
+}
+
+function getHostname(url: string): string {
+  try {
+    return new URL(url).hostname.replace('www.', '')
+  } catch {
+    return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
+  }
 }
 
 function DashboardCard({ title, children, icon }: { title: string; children: React.ReactNode; icon: React.ReactNode }) {

@@ -1,33 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react'
-import { useAuth } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function CurrentNewsSources() {
-  const [email, setEmail] = useState("")
-  const [urls, setUrls] = useState<string[]>([])
-  const { userId } = useAuth()
+interface CurrentNewsSourcesProps {
+  userData: { email: string; websites: string[] } | null;
+}
 
-  useEffect(() => {
-    if (userId) {
-      fetchUserData()
-    }
-  }, [userId])
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch(`/api/getUserData?userId=${userId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setEmail(data.email)
-        setUrls(data.websites)
-      } else {
-        console.error("Error fetching user data:", response.statusText)
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error)
-    }
+export default function CurrentNewsSources({ userData }: CurrentNewsSourcesProps) {
+  if (!userData) {
+    return <p>No subscription data available.</p>
   }
 
   return (
@@ -37,9 +18,9 @@ export default function CurrentNewsSources() {
         <CardDescription>Your current email and news source URLs</CardDescription>
       </CardHeader>
       <CardContent>
-        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Email:</strong> {userData.email}</p>
         <ul>
-          {urls.map((url, index) => (
+          {userData.websites.map((url, index) => (
             <li key={index}>{url}</li>
           ))}
         </ul>

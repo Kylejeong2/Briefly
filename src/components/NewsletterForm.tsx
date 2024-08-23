@@ -10,15 +10,17 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { PlusIcon, MinusIcon } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FREE_TIER_OPTIONS } from '@/lib/constants';
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface NewsletterFormProps {
-  isSubscribed: boolean;
+  userData: { email: string; websites: string[] } | null;
+  onUpdate: () => void;
 }
 
-export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
+export default function NewsletterForm({ userData, onUpdate }: NewsletterFormProps) {
   const { theme } = useTheme()
-  const [email, setEmail] = useState("")
-  const [urls, setUrls] = useState<string[]>([''])
+  const [email, setEmail] = useState(userData?.email || "")
+  const [urls, setUrls] = useState<string[]>(userData?.websites || [''])
   const [isCustomUrl, setIsCustomUrl] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
@@ -27,24 +29,12 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
   const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   useEffect(() => {
-    if (isSubscribed && userId) {
-      fetchUserData()
+    if (userData) {
+      setEmail(userData.email)
+      setUrls(userData.websites)
+      setIsCustomUrl(!FREE_TIER_OPTIONS.includes(userData.websites[0]))
     }
-  }, [isSubscribed, userId])
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch(`/api/getUserData?userId=${userId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setEmail(data.email)
-        setUrls(data.websites)
-        setIsCustomUrl(!FREE_TIER_OPTIONS.includes(data.websites[0]))
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error)
-    }
-  }
+  }, [userData])
 
   const handleUrlChange = (index: number, value: string) => {
     const newUrls = [...urls]
@@ -67,6 +57,13 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
     const newUrls = [...urls]
     newUrls[0] = ''
     setUrls(newUrls)
+
+    // Set warning message for custom URL
+    if (!isCustomUrl) {
+      setMessage("It must be a truncated URL (ie: https://www.latimes.com/), it also must NOT have a paywall that blocks it.")
+    } else {
+      setMessage("")
+    }
   }
 
   const isValidUrl = (url: string) => {
@@ -104,8 +101,8 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
       return
     }
 
-    const endpoint = isSubscribed ? '/api/update-subscription' : '/api/subscribe'
-    const method = isSubscribed ? 'PUT' : 'POST'
+    const endpoint = userData ? '/api/update-subscription' : '/api/subscribe'
+    const method = userData ? 'PUT' : 'POST'
 
     try {
       const response = await fetch(endpoint, {
@@ -117,10 +114,8 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
       })
 
       if (response.ok) {
-        setMessage(isSubscribed ? "Subscription updated successfully!" : "Subscription successful!")
-        if (isSubscribed) {
-          window.location.reload()
-        }
+        setMessage(userData ? "Subscription updated successfully!" : "Subscription successful!")
+        onUpdate() // Call the onUpdate function to refresh the user data in the parent component
       } else {
         const data = await response.json()
         setMessage(data.error || "An error occurred. Please try again.")
@@ -147,10 +142,15 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isSubscribed ? "Update Subscription" : "Subscribe to Newsletter"}</CardTitle>
-        <CardDescription>{isSubscribed ? "Update your email and news sources" : "Enter your email and choose your news sources"}</CardDescription>
+        <CardTitle>{userData ? "Update Subscription" : "Subscribe to Newsletter"}</CardTitle>
+        <CardDescription>{userData ? "Update your email and news sources" : "Enter your email and choose your news sources"}</CardDescription>
       </CardHeader>
       <CardContent>
+        {message && (
+          <Alert className="mb-4" variant={message.includes("successful") ? "default" : "destructive"}>
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -189,14 +189,17 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
                 )}
               </div>
               {index === 0 && isCustomUrl ? (
-                <Input
-                  id={`url${index + 1}`}
-                  placeholder="https://news-source.com"
-                  type="url"
-                  value={url}
-                  onChange={(e) => handleUrlChange(index, e.target.value)}
-                  required
-                />
+                <>
+                  <Input
+                    id={`url${index + 1}`}
+                    placeholder="https://news-source.com"
+                    type="url"
+                    value={url}
+                    onChange={(e) => handleUrlChange(index, e.target.value)}
+                    required
+                  />
+                  {message && <p className="mt-2 text-sm text-red-600">{message}</p>}
+                </>
               ) : (
                 <Select
                   value={url}
@@ -228,10 +231,9 @@ export default function NewsletterForm({ isSubscribed }: NewsletterFormProps) {
             </Button>
           )}
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Processing..." : (isSubscribed ? "Update Subscription" : "Subscribe")}
+            {isLoading ? "Processing..." : (userData ? "Update Subscription" : "Subscribe")}
           </Button>
         </form>
-        {message && <p className="mt-2 text-sm text-red-600">{message}</p>}
         {showPaymentModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg">

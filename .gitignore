@@ -41,3 +41,7 @@ next-env.d.ts
 
 # Python server
 /python_server/venv
+
+# Ignore TestNewsletterButton component file
+/src/components/TestNewsletterButton.tsx
+/python_server
