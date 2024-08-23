@@ -1,5 +1,4 @@
 import Queue from 'bull';
-import { batchProcessNewsletters } from './batchProcessor';
 import { newsletterJobDuration, newsletterJobSuccessCount, newsletterJobFailureCount } from '../app/api/metrics/metrics';
 import { generateNewsletter } from './newsletterGenerator';
 import { sendEmail } from './mailjetService';
@@ -10,33 +9,22 @@ newsletterQueue.process(async (job) => {
   const startTime = Date.now();
     
   try {
-    // Send request to Python server with user's URLs
-    const summaries = [];
-    for (const url of job.data.urls) {
-      const summary = await fetch(`${process.env.PYTHON_SERVER_URL}/scrape`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      }).then(res => res.json());
-      summaries.push(summary);
-    }
+    const { email, summaries } = job.data;
 
     // Generate newsletter content from summaries
     const newsletterContent = generateNewsletter(summaries, `${process.env.NEXT_PUBLIC_URL}/unsubscribe`);
 
     // Send email to user
-    await sendEmail(job.data.email, 'Your Daily Newsletter', newsletterContent);
+    await sendEmail(email, 'Your Daily Newsletter', newsletterContent);
 
     // Update metrics
     const duration = (Date.now() - startTime) / 1000;
     newsletterJobDuration.set(duration);
     newsletterJobSuccessCount.inc();
 
-    console.log(`Batch newsletter processing completed successfully`);
+    console.log(`Newsletter processing completed successfully for ${email}`);
   } catch (error) {
-    console.error(`Error processing newsletters:`, error);
+    console.error(`Error processing newsletter:`, error);
     newsletterJobFailureCount.inc();
     throw error;
   }

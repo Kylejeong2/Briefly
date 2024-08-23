@@ -2,11 +2,18 @@ import os
 from dotenv import load_dotenv
 from scrapegraphai.graphs import SmartScraperGraph
 import openai
-import sys
+from flask import Flask, request, jsonify
+from functools import wraps
 
 load_dotenv()
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
+API_KEY = os.getenv('FLASK_API_KEY')
+
+if not API_KEY:
+    raise ValueError('FLASK_API_KEY is not set in the environment variables')
+
+app = Flask(__name__)
 
 graph_config = {
     "llm": {
@@ -17,6 +24,15 @@ graph_config = {
     "headless": True,
 }
 
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        provided_api_key = request.headers.get('X-API-Key')
+        if not provided_api_key or provided_api_key != API_KEY:
+            return jsonify({'error': 'Invalid or missing API key'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 def scrape_website(url):
     smart_scraper_graph = SmartScraperGraph(
         prompt="You are an expert at summarizing and identifying key points in text. Locate the top 3 articles of the day on the website and summarize each of them. Make sure to capture only the key points and using only 3 sentences. The format of your summary response should look like this every time: {'top_articles': [{'title': '', 'summary': ''}, {'title': '', 'summary': ''}, {'title': '', 'summary': ''}]}",
@@ -24,26 +40,24 @@ def scrape_website(url):
         config=graph_config,
     )
     result = smart_scraper_graph.run()
-    print(result)
     return result
 
-def scrape_and_summarize(url):
-    summary = scrape_website(url)
-    response = {
-        'url': url,
-        'summary': summary
-    }
-    return response
+@app.route('/scrape-and-summarize', methods=['POST'])
+@require_api_key
+def scrape_and_summarize():
+    data = request.json
+    urls = data.get('urls')
+    if not urls:
+        return jsonify({'error': 'URLs are required'}), 400
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python app.py <url>")
-        sys.exit(1)
-    
-    url = sys.argv[1]
-    result = scrape_and_summarize(url)
-    print(f"URL: {result['url']}")
-    print(f"Summary: {result['summary']}")
+    try:
+        summaries = []
+        for url in urls:
+            summary = scrape_website(url)
+            summaries.extend(summary.get('top_articles', []))
+        return jsonify(summaries)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    app.run(port=5000)
