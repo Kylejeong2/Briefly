@@ -9,6 +9,7 @@ const template = `
     .article { margin-bottom: 20px; }
     .article h2 { color: #333; }
     .article p { color: #666; }
+    .footer { margin-top: 20px; font-size: 12px; color: #999; }
   </style>
 </head>
 <body>
@@ -19,12 +20,15 @@ const template = `
       <p>{{summary}}</p>
     </div>
   {{/each}}
+  <div class="footer">
+    <p>To unsubscribe from this newsletter, <a href="{{unsubscribeUrl}}">click here</a>.</p>
+  </div>
 </body>
 </html>
 `;
 
 const compiledTemplate = Handlebars.compile(template);
 
-export function generateNewsletter(articles: { title: string; summary: string }[]): string {
-  return compiledTemplate({ articles });
+export function generateNewsletter(articles: { title: string; summary: string }[], unsubscribeUrl: string): string {
+  return compiledTemplate({ articles, unsubscribeUrl });
 }

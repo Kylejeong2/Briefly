@@ -24,7 +24,7 @@ newsletterQueue.process(async (job) => {
     }
 
     // Generate newsletter content from summaries
-    const newsletterContent = generateNewsletter(summaries);
+    const newsletterContent = generateNewsletter(summaries, `${process.env.NEXT_PUBLIC_URL}/unsubscribe`);
 
     // Send email to user
     await sendEmail(job.data.email, 'Your Daily Newsletter', newsletterContent);

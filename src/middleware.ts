@@ -1,7 +1,7 @@
 import { authMiddleware } from "@clerk/nextjs/server";
 
 export default authMiddleware({
-  publicRoutes: ["/", "/api/(.*)"],
+  publicRoutes: ["/", "/api/(.*)", "/unsubscribe", "/dashboard/SignIn_clerk_catchall_check_1724380495866"],
 });
 
 export const config = {

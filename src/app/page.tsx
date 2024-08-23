@@ -110,7 +110,7 @@ export default function Home() {
                 <CardDescription>For casual readers</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold">$9/mo</p>
+                <p className="text-4xl font-bold">$0/mo</p>
                 <ul className="mt-4 space-y-2">
                   <li>3 news sources</li>
                   <li>Daily summaries</li>
@@ -123,39 +123,28 @@ export default function Home() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Pro</CardTitle>
+                <CardTitle>Pro (Coming Soon)</CardTitle>
                 <CardDescription>For avid news consumers</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold">$19/mo</p>
-                <ul className="mt-4 space-y-2">
-                  <li>10 news sources</li>
-                  <li>Twice-daily summaries</li>
-                  <li>Email & app delivery</li>
-                  <li>Custom categories</li>
-                </ul>
+                <p className="text-4xl font-bold">Coming Soon</p>
+                <p className="mt-4">Stay tuned for our Pro plan with advanced features!</p>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">Choose Pro</Button>
+                <Button className="w-full" disabled>Coming Soon</Button>
               </CardFooter>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Enterprise</CardTitle>
+                <CardTitle>Enterprise (Coming Soon)</CardTitle>
                 <CardDescription>For teams and organizations</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold">Custom</p>
-                <ul className="mt-4 space-y-2">
-                  <li>Unlimited news sources</li>
-                  <li>Real-time summaries</li>
-                  <li>Multi-platform delivery</li>
-                  <li>Advanced analytics</li>
-                  <li>Dedicated support</li>
-                </ul>
+                <p className="text-4xl font-bold">Coming Soon</p>
+                <p className="mt-4">Our Enterprise solution is under development. Check back later!</p>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">Contact Sales</Button>
+                <Button className="w-full" disabled>Coming Soon</Button>
               </CardFooter>
             </Card>
           </div>
@@ -167,16 +156,16 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                quote: "Briefly has revolutionized how I stay informed. It's a game-changer!",
-                author: "Jane Doe, Entrepreneur"
+                quote: "dm me to be featured here @kylejeong21 on X",
+                author: "Kyle Jeong"
               },
               {
-                quote: "I save hours each day thanks to these concise summaries. Highly recommended!",
-                author: "John Smith, Journalist"
+                quote: "dm me to be featured here @kylejeong21 on X",
+                author: "Kyle Jeong"
               },
               {
-                quote: "The custom news sources feature is exactly what I needed. Great service!",
-                author: "Emily Brown, Marketing Manager"
+                quote: "dm me to be featured here @kylejeong21 on X",
+                author: "Kyle Jeong"
               }
             ].map((testimonial, index) => (
               <Card key={index}>
@@ -200,7 +189,7 @@ export default function Home() {
             <AccordionItem value="item-1">
               <AccordionTrigger>How often will I receive summaries?</AccordionTrigger>
               <AccordionContent>
-                Depending on your plan, you&apos;ll receive summaries daily or twice daily. Enterprise users can opt for real-time updates.
+               You&apos;ll receive summaries once daily.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
@@ -210,9 +199,9 @@ export default function Home() {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-              <AccordionTrigger>Is there a mobile app available?</AccordionTrigger>
+              <AccordionTrigger>How does Briefly ensure the accuracy of its summaries?</AccordionTrigger>
               <AccordionContent>
-                Yes, we offer mobile apps for both iOS and Android platforms for our Pro and Enterprise users.
+                Briefly uses advanced AI tech to generate summaries from reputable news sources. Our system is designed to extract key information while maintaining accuracy. However, we always encourage users to refer to the original articles for the most comprehensive understanding of a topic.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4">

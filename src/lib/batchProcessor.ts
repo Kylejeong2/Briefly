@@ -52,7 +52,7 @@ export async function batchProcessNewsletters() {
   // 4. Generate and send newsletters for each user
   for (const user of users) {
     const userSummaries = user.websites.flatMap(website => summariesMap.get(website) || []);
-    const newsletterContent = generateNewsletter(userSummaries);
+    const newsletterContent = generateNewsletter(userSummaries, `${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe`);
     await sendEmail(user.email, 'Your Daily Briefly', newsletterContent);
   }
 }
