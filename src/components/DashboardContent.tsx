@@ -29,7 +29,7 @@ export default function DashboardContent() {
       if (response.ok) {
         const data = await response.json()
         setUserData(data)
-        setIsSubscribed(data.websites?.length > 0 || false)
+        setIsSubscribed(data.websites.length > 0) // Set based on the actual subscription status
       } else if (response.status === 404) {
         setIsSubscribed(false)
       } else {
@@ -53,15 +53,15 @@ export default function DashboardContent() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <DashboardCard title="News Sources" icon={<FaNewspaper />}>
-          {userData && <CurrentNewsSources userData={userData} />}
+          <CurrentNewsSources userData={userData} />
         </DashboardCard>
       <DashboardCard title={isSubscribed ? "Update Subscription" : "Subscribe to Newsletter"} icon={<FaEnvelope />}>
-        {userData && <NewsletterForm userData={userData} onUpdate={fetchUserData} />}
+        <NewsletterForm userData={userData} onUpdate={fetchUserData} />
       </DashboardCard>
         <DashboardCard title="List of Websites Currently Not Working (Will be ready soon)" icon={<FaFileAlt />}>
           <ul className="list-disc pl-5 text-gray-600 dark:text-gray-300">
             {NOT_WORKING_YET.map((website, index) => (
-              <li key={index}>{getHostname(website)}</li>
+              <li key={index}>{new URL(website).hostname.replace('www.', '')}</li>
             ))}
           </ul>
         </DashboardCard>
@@ -70,14 +70,6 @@ export default function DashboardContent() {
         </DashboardCard> */}
     </div>
   )
-}
-
-function getHostname(url: string): string {
-  try {
-    return new URL(url).hostname.replace('www.', '')
-  } catch {
-    return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0]
-  }
 }
 
 function DashboardCard({ title, children, icon }: { title: string; children: React.ReactNode; icon: React.ReactNode }) {
