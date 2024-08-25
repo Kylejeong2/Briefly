@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { $users, $websites } from '@/lib/db/schema';
-import { inArray } from 'drizzle-orm';
+import { inArray, eq } from 'drizzle-orm';
 
 interface ArticleSummary {
   url: string;
@@ -9,7 +9,7 @@ interface ArticleSummary {
   source: string;
 }
 
-const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL || 'http://localhost:8000';
+const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL || "https://usebriefly-server.onrender.com";
 const API_KEY = process.env.PYTHON_SERVER_API_KEY;
 
 if (!API_KEY) {
@@ -20,6 +20,8 @@ export async function batchProcessNewsletters() {
   try {
     // 1. Fetch all users
     const users = await db.select().from($users);
+    // Test with my email
+    // const users = await db.select().from($users).where(eq($users.email, ''));
 
     // 2. Get unique websites
     const uniqueWebsites = new Set(users.flatMap(user => user.websites));
